@@ -1,0 +1,983 @@
+{
+  "summary": {
+    "topHeadings": [
+      {
+        "text": "Goals",
+        "level": 1
+      },
+      {
+        "text": "Life Areas",
+        "level": 2
+      },
+      {
+        "text": "Tasks",
+        "level": 2
+      }
+    ],
+    "firstParagraph": "Meditate on what you want to achieve and write. Be deep and honest with yourself. For example: “Learn to speak English”.",
+    "relationshipSummary": [
+      "Goal Tracker are linked to Tasks via the 'Tasks' property.",
+      "Goal Tracker are linked to Life Areas via the 'categories' property.",
+      "Tasks are linked to Goal Tracker via the 'Related to' property.",
+      "Life Areas are linked to Goal Tracker via the 'Goals' property."
+    ],
+    "totalDatabases": 3,
+    "totalBlocks": 23,
+    "generatedAt": "2025-08-02T11:15:15.748Z"
+  },
+  "relationships": [
+    {
+      "from": "Goal Tracker",
+      "property": "Tasks",
+      "to": "Tasks",
+      "type": "relation"
+    },
+    {
+      "from": "Goal Tracker",
+      "property": "categories",
+      "to": "Life Areas",
+      "type": "relation"
+    },
+    {
+      "from": "Tasks",
+      "property": "Related to",
+      "to": "Goal Tracker",
+      "type": "relation"
+    },
+    {
+      "from": "Life Areas",
+      "property": "Goals",
+      "to": "Goal Tracker",
+      "type": "relation"
+    }
+  ],
+  "content": [
+    {
+      "type": "child_database",
+      "title": null,
+      "id": "243803b5-90cc-81eb-b12d-e43dead03f09"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "callout",
+      "text": "Goals",
+      "blocks": []
+    },
+    {
+      "type": "column",
+      "blocks": []
+    },
+    {
+      "type": "child_database",
+      "title": null,
+      "id": "243803b5-90cc-8176-b9ee-f560b91990f3"
+    },
+    {
+      "type": "callout",
+      "text": "Life Areas",
+      "blocks": []
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "column",
+      "blocks": []
+    },
+    {
+      "type": "column_list",
+      "blocks": []
+    },
+    {
+      "type": "child_database",
+      "title": null,
+      "id": "243803b5-90cc-812c-90a4-eaa296bfe2a5"
+    },
+    {
+      "type": "callout",
+      "text": "Tasks",
+      "blocks": []
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "database",
+      "title": "Goal Tracker",
+      "id": "243803b5-90cc-8196-96db-c77d769bfb97",
+      "properties": [
+        {
+          "name": "Days to reach goals",
+          "type": "formula",
+          "expression": "dateBetween({{notion:block_property:ohPw:243803b5-90cc-8105-b585-000b8fa2ce67:a8a2fba8-7107-4e92-add8-027fc657db49}}, {{notion:block_property:vbG%3B:243803b5-90cc-8105-b585-000b8fa2ce67:a8a2fba8-7107-4e92-add8-027fc657db49}}, \"days\")"
+        },
+        {
+          "name": "Tasks",
+          "type": "relation",
+          "relation_id": "243803b5-90cc-8143-8ba2-de6f770a1310"
+        },
+        {
+          "name": "Total tasks",
+          "type": "rollup",
+          "rollup": {
+            "relation_id": "JmjC",
+            "property_name": "Related to",
+            "function": "count"
+          }
+        },
+        {
+          "name": "Days left",
+          "type": "formula",
+          "expression": "dateBetween({{notion:block_property:ohPw:243803b5-90cc-8105-b585-000b8fa2ce67:a8a2fba8-7107-4e92-add8-027fc657db49}}, now(), \"days\")"
+        },
+        {
+          "name": "Remaining days",
+          "type": "formula",
+          "expression": "if(({{notion:block_property:LhKa:00000000-0000-0000-0000-000000000000:a8a2fba8-7107-4e92-add8-027fc657db49}} > 1) or ({{notion:block_property:LhKa:00000000-0000-0000-0000-000000000000:a8a2fba8-7107-4e92-add8-027fc657db49}} < 1), format({{notion:block_property:LhKa:00000000-0000-0000-0000-000000000000:a8a2fba8-7107-4e92-add8-027fc657db49}}) + \" days remaining.\", if({{notion:block_property:LhKa:00000000-0000-0000-0000-000000000000:a8a2fba8-7107-4e92-add8-027fc657db49}} <= 1, format({{notion:block_property:LhKa:00000000-0000-0000-0000-000000000000:a8a2fba8-7107-4e92-add8-027fc657db49}}) + \" day remaining.\", \"No deadline established\"))"
+        },
+        {
+          "name": "categories",
+          "type": "relation",
+          "relation_id": "243803b5-90cc-817e-9ab5-f41c3054432a"
+        },
+        {
+          "name": "Completed tasks",
+          "type": "rollup",
+          "rollup": {
+            "relation_id": "JmjC",
+            "property_name": "Automatic Checkbox",
+            "function": "percent_checked"
+          }
+        },
+        {
+          "name": "Progress",
+          "type": "formula",
+          "expression": "round({{notion:block_property:_%5Ckq:243803b5-90cc-8105-b585-000b8fa2ce67:a8a2fba8-7107-4e92-add8-027fc657db49}} * 100) / 100"
+        },
+        {
+          "name": "Status",
+          "type": "status"
+        },
+        {
+          "name": "Deadline",
+          "type": "date"
+        },
+        {
+          "name": "Created time",
+          "type": "created_time"
+        },
+        {
+          "name": "Name",
+          "type": "title"
+        }
+      ],
+      "sampleRows": [
+        {
+          "rowTitle": "Be more active",
+          "properties": {
+            "Days to reach goals": {
+              "type": "formula",
+              "supported": false
+            },
+            "Tasks": {
+              "type": "relation",
+              "supported": false
+            },
+            "Total tasks": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Days left": {
+              "type": "formula",
+              "supported": false
+            },
+            "Remaining days": {
+              "type": "formula",
+              "supported": false
+            },
+            "categories": {
+              "type": "relation",
+              "supported": false
+            },
+            "Completed tasks": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Progress": {
+              "type": "formula",
+              "supported": false
+            },
+            "Status": {
+              "type": "status",
+              "supported": false
+            },
+            "Deadline": "2023-12-31",
+            "Created time": {
+              "type": "created_time",
+              "supported": false
+            },
+            "Name": "Be more active"
+          },
+          "blocks": [],
+          "blocksText": ""
+        },
+        {
+          "rowTitle": "Read 4 books",
+          "properties": {
+            "Days to reach goals": {
+              "type": "formula",
+              "supported": false
+            },
+            "Tasks": {
+              "type": "relation",
+              "supported": false
+            },
+            "Total tasks": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Days left": {
+              "type": "formula",
+              "supported": false
+            },
+            "Remaining days": {
+              "type": "formula",
+              "supported": false
+            },
+            "categories": {
+              "type": "relation",
+              "supported": false
+            },
+            "Completed tasks": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Progress": {
+              "type": "formula",
+              "supported": false
+            },
+            "Status": {
+              "type": "status",
+              "supported": false
+            },
+            "Deadline": "2023-12-31",
+            "Created time": {
+              "type": "created_time",
+              "supported": false
+            },
+            "Name": "Read 4 books"
+          },
+          "blocks": [
+            {
+              "type": "quote"
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "What do you want to achieve?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Meditate on what you want to achieve and write. Be deep and honest with yourself. For example: “Learn to speak English”."
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "The 5 Why’s.  Follow the example below to discover the reasons why you want to achieve your goals."
+            },
+            {
+              "type": "paragraph",
+              "text": "Why do I want to learn spanish? I want to move to Spain."
+            },
+            {
+              "type": "paragraph",
+              "text": "Why do I want to move to Spain? I need a fresh start."
+            },
+            {
+              "type": "paragraph",
+              "text": "Why do I feel like I need a fresh start? …"
+            },
+            {
+              "type": "paragraph",
+              "text": "Why…?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Why…?"
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "Make a list of the actions that you will carry out daily and that will allow you to cross the bridge between you and your goals."
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "Establish the intention of implementation."
+            },
+            {
+              "type": "paragraph",
+              "text": "I am going to [action] at [time] at [place]"
+            },
+            {
+              "type": "paragraph",
+              "text": "Example: I am going to train strength exercises for 1 hour after work from Monday to Friday in the gym near my house."
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "Reevaluate."
+            },
+            {
+              "type": "paragraph",
+              "text": "Constantly evaluate your progress. Keep within your system those things that will help you progress and modify or eliminate those that do not work for you."
+            },
+            {
+              "type": "paragraph",
+              "text": "\n"
+            },
+            {
+              "type": "callout",
+              "text": " System based on the book Atomic Habits by James Clear."
+            }
+          ],
+          "blocksText": "- What do you want to achieve?\n- Meditate on what you want to achieve and write. Be deep and honest with yourself. For example: “Learn to speak English”.\n- The 5 Why’s.  Follow the example below to discover the reasons why you want to achieve your goals.\n- Why do I want to learn spanish? I want to move to Spain.\n- Why do I want to move to Spain? I need a fresh start.\n- Why do I feel like I need a fresh start? …\n- Why…?\n- Why…?\n- Make a list of the actions that you will carry out daily and that will allow you to cross the bridge between you and your goals.\n- Establish the intention of implementation.\n- I am going to [action] at [time] at [place]\n- Example: I am going to train strength exercises for 1 hour after work from Monday to Friday in the gym near my house.\n- Reevaluate.\n- Constantly evaluate your progress. Keep within your system those things that will help you progress and modify or eliminate those that do not work for you.\n- \n\n-  System based on the book Atomic Habits by James Clear."
+        },
+        {
+          "rowTitle": "Learn Marketing",
+          "properties": {
+            "Days to reach goals": {
+              "type": "formula",
+              "supported": false
+            },
+            "Tasks": {
+              "type": "relation",
+              "supported": false
+            },
+            "Total tasks": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Days left": {
+              "type": "formula",
+              "supported": false
+            },
+            "Remaining days": {
+              "type": "formula",
+              "supported": false
+            },
+            "categories": {
+              "type": "relation",
+              "supported": false
+            },
+            "Completed tasks": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Progress": {
+              "type": "formula",
+              "supported": false
+            },
+            "Status": {
+              "type": "status",
+              "supported": false
+            },
+            "Deadline": "2023-12-31",
+            "Created time": {
+              "type": "created_time",
+              "supported": false
+            },
+            "Name": "Learn Marketing"
+          },
+          "blocks": [
+            {
+              "type": "quote"
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "What do you want to achieve?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Meditate on what you want to achieve and write. Be deep and honest with yourself. For example: “Learn to speak English”."
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "The 5 Why’s.  Follow the example below to discover the reasons why you want to achieve your goals."
+            },
+            {
+              "type": "paragraph",
+              "text": "Why do I want to learn spanish? I want to move to Spain."
+            },
+            {
+              "type": "paragraph",
+              "text": "Why do I want to move to Spain? I need a fresh start."
+            },
+            {
+              "type": "paragraph",
+              "text": "Why do I feel like I need a fresh start? …"
+            },
+            {
+              "type": "paragraph",
+              "text": "Why…?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Why…?"
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "Make a list of the actions that you will carry out daily and that will allow you to cross the bridge between you and your goals."
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "Establish the intention of implementation."
+            },
+            {
+              "type": "paragraph",
+              "text": "I am going to [action] at [time] at [place]"
+            },
+            {
+              "type": "paragraph",
+              "text": "Example: I am going to train strength exercises for 1 hour after work from Monday to Friday in the gym near my house."
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            },
+            {
+              "type": "bulleted_list_item",
+              "text": "Reevaluate."
+            },
+            {
+              "type": "paragraph",
+              "text": "Constantly evaluate your progress. Keep within your system those things that will help you progress and modify or eliminate those that do not work for you."
+            },
+            {
+              "type": "paragraph",
+              "text": "\n"
+            },
+            {
+              "type": "callout",
+              "text": " System based on the book Atomic Habits by James Clear."
+            }
+          ],
+          "blocksText": "- What do you want to achieve?\n- Meditate on what you want to achieve and write. Be deep and honest with yourself. For example: “Learn to speak English”.\n- The 5 Why’s.  Follow the example below to discover the reasons why you want to achieve your goals.\n- Why do I want to learn spanish? I want to move to Spain.\n- Why do I want to move to Spain? I need a fresh start.\n- Why do I feel like I need a fresh start? …\n- Why…?\n- Why…?\n- Make a list of the actions that you will carry out daily and that will allow you to cross the bridge between you and your goals.\n- Establish the intention of implementation.\n- I am going to [action] at [time] at [place]\n- Example: I am going to train strength exercises for 1 hour after work from Monday to Friday in the gym near my house.\n- Reevaluate.\n- Constantly evaluate your progress. Keep within your system those things that will help you progress and modify or eliminate those that do not work for you.\n- \n\n-  System based on the book Atomic Habits by James Clear."
+        }
+      ]
+    },
+    {
+      "type": "child_database",
+      "title": "Goal Tracker",
+      "id": "243803b5-90cc-8196-96db-c77d769bfb97"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "database",
+      "title": "Tasks",
+      "id": "243803b5-90cc-8143-8ba2-de6f770a1310",
+      "properties": [
+        {
+          "name": "Related to",
+          "type": "relation",
+          "relation_id": "243803b5-90cc-8196-96db-c77d769bfb97"
+        },
+        {
+          "name": "Status",
+          "type": "status"
+        },
+        {
+          "name": "Deadline",
+          "type": "date"
+        },
+        {
+          "name": "Automatic Checkbox",
+          "type": "formula",
+          "expression": "if(({{notion:block_property:LEPX:243803b5-90cc-8173-9cc0-000baf256939:a8a2fba8-7107-4e92-add8-027fc657db49}} == \"Done\"), true, false)"
+        },
+        {
+          "name": "Name",
+          "type": "title"
+        }
+      ],
+      "sampleRows": [
+        {
+          "rowTitle": "",
+          "properties": {
+            "Related to": {
+              "type": "relation",
+              "supported": false
+            },
+            "Status": {
+              "type": "status",
+              "supported": false
+            },
+            "Deadline": "",
+            "Automatic Checkbox": {
+              "type": "formula",
+              "supported": false
+            },
+            "Name": ""
+          },
+          "blocks": [],
+          "blocksText": ""
+        },
+        {
+          "rowTitle": "New Task",
+          "properties": {
+            "Related to": {
+              "type": "relation",
+              "supported": false
+            },
+            "Status": {
+              "type": "status",
+              "supported": false
+            },
+            "Deadline": "",
+            "Automatic Checkbox": {
+              "type": "formula",
+              "supported": false
+            },
+            "Name": "New Task"
+          },
+          "blocks": [],
+          "blocksText": ""
+        },
+        {
+          "rowTitle": "Atomic Habits - James Clear",
+          "properties": {
+            "Related to": {
+              "type": "relation",
+              "supported": false
+            },
+            "Status": {
+              "type": "status",
+              "supported": false
+            },
+            "Deadline": "2023-03-31",
+            "Automatic Checkbox": {
+              "type": "formula",
+              "supported": false
+            },
+            "Name": "Atomic Habits - James Clear"
+          },
+          "blocks": [],
+          "blocksText": ""
+        }
+      ]
+    },
+    {
+      "type": "child_database",
+      "title": "Tasks",
+      "id": "243803b5-90cc-8143-8ba2-de6f770a1310"
+    },
+    {
+      "type": "database",
+      "title": "Life Areas",
+      "id": "243803b5-90cc-817e-9ab5-f41c3054432a",
+      "properties": [
+        {
+          "name": "Progress",
+          "type": "rollup",
+          "rollup": {
+            "relation_id": "pAid",
+            "property_name": "Progress",
+            "function": "average"
+          }
+        },
+        {
+          "name": "Goals",
+          "type": "relation",
+          "relation_id": "243803b5-90cc-8196-96db-c77d769bfb97"
+        },
+        {
+          "name": "Name",
+          "type": "title"
+        }
+      ],
+      "sampleRows": [
+        {
+          "rowTitle": "Finances",
+          "properties": {
+            "Progress": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Goals": {
+              "type": "relation",
+              "supported": false
+            },
+            "Name": "Finances"
+          },
+          "blocks": [
+            {
+              "type": "child_database",
+              "title": null,
+              "id": "243803b5-90cc-81c7-9934-c65e7f1ff758"
+            }
+          ],
+          "blocksText": ""
+        },
+        {
+          "rowTitle": "Career & Business",
+          "properties": {
+            "Progress": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Goals": {
+              "type": "relation",
+              "supported": false
+            },
+            "Name": "Career & Business"
+          },
+          "blocks": [
+            {
+              "type": "child_database",
+              "title": null,
+              "id": "243803b5-90cc-8140-a61f-f898218aa7a0"
+            },
+            {
+              "type": "paragraph",
+              "text": ""
+            }
+          ],
+          "blocksText": ""
+        },
+        {
+          "rowTitle": "Personal Growth",
+          "properties": {
+            "Progress": {
+              "type": "rollup",
+              "supported": false
+            },
+            "Goals": {
+              "type": "relation",
+              "supported": false
+            },
+            "Name": "Personal Growth"
+          },
+          "blocks": [
+            {
+              "type": "child_database",
+              "title": null,
+              "id": "243803b5-90cc-81ea-9b39-cab2e77a60b8"
+            }
+          ],
+          "blocksText": ""
+        }
+      ]
+    },
+    {
+      "type": "child_database",
+      "title": "Life Areas",
+      "id": "243803b5-90cc-817e-9ab5-f41c3054432a"
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    },
+    {
+      "type": "child_page",
+      "blocks": []
+    },
+    {
+      "type": "toggle",
+      "text": "Databases",
+      "blocks": []
+    },
+    {
+      "type": "paragraph",
+      "text": ""
+    }
+  ],
+  "flatBlocks": [
+    {
+      "type": "callout",
+      "text": "Goals",
+      "depth": 2,
+      "parentType": "page"
+    },
+    {
+      "type": "callout",
+      "text": "Life Areas",
+      "depth": 2,
+      "parentType": "page"
+    },
+    {
+      "type": "callout",
+      "text": "Tasks",
+      "depth": 0,
+      "parentType": "page"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "What do you want to achieve?",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Meditate on what you want to achieve and write. Be deep and honest with yourself. For example: “Learn to speak English”.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "The 5 Why’s.  Follow the example below to discover the reasons why you want to achieve your goals.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why do I want to learn spanish? I want to move to Spain.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why do I want to move to Spain? I need a fresh start.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why do I feel like I need a fresh start? …",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why…?",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why…?",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "Make a list of the actions that you will carry out daily and that will allow you to cross the bridge between you and your goals.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "Establish the intention of implementation.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "I am going to [action] at [time] at [place]",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Example: I am going to train strength exercises for 1 hour after work from Monday to Friday in the gym near my house.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "Reevaluate.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Constantly evaluate your progress. Keep within your system those things that will help you progress and modify or eliminate those that do not work for you.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "\n",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "callout",
+      "text": " System based on the book Atomic Habits by James Clear.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "What do you want to achieve?",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Meditate on what you want to achieve and write. Be deep and honest with yourself. For example: “Learn to speak English”.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "The 5 Why’s.  Follow the example below to discover the reasons why you want to achieve your goals.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why do I want to learn spanish? I want to move to Spain.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why do I want to move to Spain? I need a fresh start.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why do I feel like I need a fresh start? …",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why…?",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Why…?",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "Make a list of the actions that you will carry out daily and that will allow you to cross the bridge between you and your goals.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "Establish the intention of implementation.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "I am going to [action] at [time] at [place]",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Example: I am going to train strength exercises for 1 hour after work from Monday to Friday in the gym near my house.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "bulleted_list_item",
+      "text": "Reevaluate.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "Constantly evaluate your progress. Keep within your system those things that will help you progress and modify or eliminate those that do not work for you.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "paragraph",
+      "text": "\n",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "callout",
+      "text": " System based on the book Atomic Habits by James Clear.",
+      "depth": 5,
+      "parentType": "database row"
+    },
+    {
+      "type": "toggle",
+      "text": "Databases",
+      "depth": 0,
+      "parentType": "page"
+    }
+  ],
+  "templateType": "goal-tracker"
+}
