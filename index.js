@@ -387,27 +387,12 @@ ${prop.expression}
       if (prop.type === 'relation') {
         const relatedDb = output.titles.databases[prop.relation_id];
         if (relatedDb) {
-          checklist += `- 
-${db.title}
- → 
-${prop.name}
- → 
-${relatedDb.title}
-`;
+          checklist += `- ${db.title} → ${prop.name} → ${relatedDb.title}\n`;
         }
       } else if (prop.type === 'rollup') {
         const relatedDbForRollup = output.titles.databases[prop.rollup.relation_property_id];
         if (relatedDbForRollup) {
-          checklist += `- 
-${db.title}
- → 
-(rolling up 
-${prop.rollup.rollup_property_name}
- from 
-${relatedDbForRollup.title}
- using 
-${prop.rollup.function}
-`;
+          checklist += `- ${db.title} → (rolling up ${prop.rollup.rollup_property_name} from ${relatedDbForRollup.title} using ${prop.rollup.function})\n`;
         }
       }
     });
