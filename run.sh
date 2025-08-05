@@ -6,5 +6,3 @@ set -e
 # Run the scan
 npm run scan
 
-# Run the transform on the latest scan
-npm run transform
