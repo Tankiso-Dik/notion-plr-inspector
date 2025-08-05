@@ -1,12 +1,11 @@
 {
   "name": "notion-plr-inspector",
   "version": "1.0.0",
-  "description": "A toolkit for inspecting, summarizing, and transforming Notion templates.",
+  "description": "A toolkit for inspecting and summarizing Notion templates.",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "scan": "node index.js",
-    "transform": "node transform.js --scanDir $(node get-latest-scan-dir.js)",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
