@@ -7,7 +7,7 @@
   "scripts": {
     "scan": "node index.js",
     "transform": "node transform.js --scanDir $(node get-latest-scan-dir.js)",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test"
   },
   "keywords": [
     "notion",

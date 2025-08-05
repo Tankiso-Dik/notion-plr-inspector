@@ -339,8 +339,7 @@ function generateChecklist(outPath) {
     db.properties.forEach(prop => {
       checklist += `  - **Name:** ${prop.name}\n`;
       checklist += `    **Type:** ${prop.type}\n`;
-      if (prop.expression) checklist += `    **Expression:** 
-${prop.expression}
+      if (prop.expression) checklist += `    **Expression:** \n${prop.expression}\n`;
       if (prop.relation_id) {
         const relatedDb = output.titles.databases[prop.relation_id];
         checklist += `    **Relation ID:** ${prop.relation_id}\n`;
