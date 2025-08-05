@@ -6,7 +6,6 @@
   "type": "module",
   "scripts": {
     "scan": "node index.js",
-    "transform": "node transform.js --scanDir $(node get-latest-scan-dir.js)",
     "test": "node --test"
   },
   "keywords": [
