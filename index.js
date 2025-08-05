@@ -339,9 +339,7 @@ function generateChecklist(outPath) {
     db.properties.forEach(prop => {
       checklist += `  - **Name:** ${prop.name}\n`;
       checklist += `    **Type:** ${prop.type}\n`;
-      if (prop.expression) checklist += `    **Expression:** 
-${prop.expression}
-`;
+      if (prop.expression) checklist += `    **Expression:** \n${prop.expression}\n`;
       if (prop.relation_id) {
         const relatedDb = output.titles.databases[prop.relation_id];
         checklist += `    **Relation ID:** ${prop.relation_id}\n`;
@@ -392,7 +390,7 @@ ${prop.expression}
       } else if (prop.type === 'rollup') {
         const relatedDbForRollup = output.titles.databases[prop.rollup.relation_property_id];
         if (relatedDbForRollup) {
-          checklist += `- ${db.title} → (rolling up ${prop.rollup.rollup_property_name} from ${relatedDbForRollup.title} using ${prop.rollup.function})\n`;
+          checklist += `- ${db.title} → ${prop.name} (rolling up ${prop.rollup.rollup_property_name} from ${relatedDbForRollup.title} using ${prop.rollup.function})\n`;
         }
       }
     });
