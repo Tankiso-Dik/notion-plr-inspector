@@ -21,8 +21,10 @@ test('get-latest-scan-dir selects the most recent scan directory', async () => {
     // Create a temporary directory for isolated testing
     tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'scan-test-'));
 
-    // Define the source path of the script to be tested
-    const scriptSrc = path.resolve(__dirname, 'get-latest-scan-dir.js');
+    // Define the source path of the script to be tested. The implementation
+    // lives one directory up from this test file, so resolve it relative to
+    // the repository root.
+    const scriptSrc = path.resolve(__dirname, '../get-latest-scan-dir.js');
     // Define the destination path within the temporary directory
     const scriptDest = path.join(tmpDir, 'get-latest-scan-dir.js');
 
