@@ -407,7 +407,12 @@ function generateChecklist(outPath) {
   }).parse();
 
   const { pageId, templateName } = argv;
-  const outPath = path.join(__dirname, 'scans', templateName);
+
+  // Ensure scans directory exists and clean template output directory
+  const scansDir = path.join(__dirname, 'scans');
+  fs.mkdirSync(scansDir, { recursive: true });
+  const outPath = path.join(scansDir, templateName);
+  fs.rmSync(outPath, { recursive: true, force: true });
   fs.mkdirSync(outPath, { recursive: true });
 
   if (!pageId) {
@@ -438,5 +443,14 @@ function generateChecklist(outPath) {
   console.log(`\n✅ Deep scan complete. Rich JSON saved to ${jsonPath}`);
 
   generateChecklist(outPath);
-  console.log(`✅ Data dump checklist saved to ${path.join(outPath, 'CHECKLIST_DATA_DUMP.md')}`);
+  const checklistPath = path.join(outPath, 'CHECKLIST_DATA_DUMP.md');
+  console.log(`✅ Data dump checklist saved to ${checklistPath}`);
+
+  // Prepare flat outputs directory for artifact upload
+  const outputsDir = path.join(__dirname, 'outputs');
+  fs.rmSync(outputsDir, { recursive: true, force: true });
+  fs.mkdirSync(outputsDir, { recursive: true });
+  fs.copyFileSync(jsonPath, path.join(outputsDir, 'notion_plr_extracted.json'));
+  fs.copyFileSync(checklistPath, path.join(outputsDir, 'CHECKLIST_DATA_DUMP.md'));
+  console.log(`✅ Copied final outputs to ${outputsDir}`);
 })();
