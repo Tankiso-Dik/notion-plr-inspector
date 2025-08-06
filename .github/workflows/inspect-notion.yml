@@ -1,0 +1,36 @@
+name: Inspect Notion Template
+
+on:
+  workflow_dispatch:
+    inputs:
+      notionPageId:
+        description: "Notion page ID to scan"
+        required: true
+        default: ""
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    env:
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      NOTION_PAGE_ID: ${{ github.event.inputs.notionPageId }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Notion PLR Inspector
+        run: node index.js
+
+      - name: Upload output as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: notion-output
+          path: outputs/
