@@ -78,10 +78,14 @@ NOTION_PAGE_ID=your_template_id
 
 ### GitHub Actions
 
-* Store your `NOTION_API_KEY` in:
+This project includes a manual GitHub Actions workflow for running the inspector in the cloud.
 
-  * `Settings > Secrets > Actions`
-* Use the provided `inspect-notion.yml` workflow to trigger scans via the GitHub Actions UI
+1. In your repository, go to **Settings → Secrets and variables → Actions** and add a secret named `NOTION_API_KEY` containing your Notion integration token.
+2. Open the **Actions** tab and select **Inspect Notion Template**.
+3. Click **Run workflow**, enter the Notion page ID in the input box, and press the green **Run workflow** button.
+4. After the job completes, download the `notion-output` artifact from the run's summary page.
+
+> The workflow does not run automatically; trigger it manually whenever you need a new scan.
 
 ---
 
