@@ -1,49 +1,115 @@
-# 🔍 Notion PLR Inspector
+# 🕵️ Notion PLR Inspector
 
-Welcome to **Notion PLR Inspector** — a tiny but mighty 🔧 toolkit for grabbing everything you'd want to know about a Notion template **without** adding any opinions or analysis.
+The **Notion PLR Inspector** is a diagnostic scanner that recursively crawls a Notion template page and extracts all the layout, visual, and metadata elements relevant for **rebranding and polishing PLR/MRR Notion products**.
 
----
-
-## ✨ What It Does
-
-- 🧠 **Extracts structure** — page titles, block types, column layouts, and nested groups  
-- 🎨 **Captures visuals** — icons, covers, media URLs  
-- 🗄️ **Maps databases** — fields, formulas, relations, and view types  
-- 📝 **Outputs machine-friendly files** — JSON (always) and Markdown (optional)
-
-All you get is **pure data**, ready for other GPTs or automation tools to transform, rebrand, or narrate.
+This tool collects *raw structured data* only — all analysis, copywriting, and visual planning is done downstream by AI systems like `Makeover GPT`, `Product Preparer GPT`, or `OBS GPT`.
 
 ---
 
-## 🚀 Quick Start (GitHub Actions)
+## 🔍 What It Does
 
-1. Go to **Actions → Inspect Notion Template → Run workflow**
-2. Enter the Notion page ID you want to scan
-3. Wait for the job to finish, then download the `notion-output` artifact  
-   (Inside you'll find `notion_plr_extracted.json` and any optional extras)
-
-> Make sure you’ve set a `NOTION_API_KEY` secret in your repository settings.
-
----
-
-## 📂 Output Preview
-
-```
-outputs/
-├── notion_plr_extracted.json   # Full structured snapshot
-├── notion_plr_extracted.md     # Optional human-readable outline
-└── db_<name>.json              # Optional database schema dumps
-```
+- Connects to a Notion page using the Notion API
+- Recursively walks through the page block-by-block
+- Extracts:
+  - Block type and nesting
+  - Callouts and headings
+  - Media blocks (images, videos, files)
+  - Database schemas and view types
+  - Column layouts, toggles, and groupings
+- Outputs rich, structured JSON (and optionally Markdown)
+- Designed for machine parsing — **not human readability**
 
 ---
 
-## 🛠️ Local Development
+## 📂 Project Structure
 
 ```bash
-npm install
-NOTION_API_KEY=secret_xxx NOTION_PAGE_ID=yyy node index.js
+notion-plr-inspector/
+├── index.js              # Entry point – runs full scan
+├── notion-client.js      # Notion API wrapper
+├── extractor.js          # Converts raw blocks to structured layout info
+├── writer.js             # Handles file output
+├── utils.js              # Optional helper functions
+├── outputs/              # Where extracted files are saved
+│   ├── notion_plr_extracted.json
+│   ├── notion_plr_extracted.md         (optional)
+│   └── db_<name>.json                  (optional)
+├── .env                  # (Local only) Notion API key and default page ID
+└── README.md
 ```
 
 ---
 
-Happy inspecting! 🕵️‍♀️
+## 📄 Outputs
+
+### ✅ `notion_plr_extracted.json`
+
+* Full structured representation of the Notion template
+* Includes:
+
+  * Layout grouping (columns, nesting)
+  * Block text and type
+  * Media file URLs
+  * Page icon & cover
+  * Database schema + views
+  * Metadata for downstream GPT parsing
+
+### ✅ `db_<name>.json` *(optional)*
+
+* One file per embedded or linked database
+* Field types, view types, linked relationships
+
+### ✅ `notion_plr_extracted.md` *(optional)*
+
+* A flattened Markdown summary for debugging
+
+---
+
+## ⚙️ Configuration
+
+### Local `.env` setup
+
+```env
+NOTION_API_KEY=secret_xxxx
+NOTION_PAGE_ID=your_template_id
+```
+
+> 🔐 Do not commit your `.env` file. Use GitHub Secrets or platform-specific env variables in production.
+
+### GitHub Actions
+
+* Store your `NOTION_API_KEY` in:
+
+  * `Settings > Secrets > Actions`
+* Use the provided `inspect-notion.yml` workflow to trigger scans via the GitHub Actions UI
+
+---
+
+## 💡 Design Philosophy
+
+* **Machine-first**: JSON output is meant for GPT agents, not humans
+* **Insight-rich**: Layout, media, and structure must be captured in full
+* **No filtering**: Inspector does not decide what's important — downstream GPTs do
+* **Layout-preserving**: Closely related blocks (e.g. heading + callout) are grouped
+* **Nesting-aware**: Columns, toggles, and children are retained in logical hierarchy
+
+---
+
+## 🛠 Future Improvements
+
+* Add CLI flags for `--markdown-only` or `--json-only`
+* Batch scanning support
+* Export schema summaries to CSV or YAML
+
+---
+
+## 📤 License
+
+MIT (or custom internal use only — TBD)
+
+---
+
+## 🙌 Built by Papermoon
+
+This tool powers the scalable rebranding pipeline for Notion PLR templates. It’s part of a larger system that includes content generation, visual planning, and listing automation.
+
