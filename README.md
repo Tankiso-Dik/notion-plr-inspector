@@ -70,8 +70,8 @@ notion-plr-inspector/
 ### Local `.env` setup
 
 ```env
-NOTION_API_KEY=secret_xxxx
-NOTION_PAGE_ID=your_template_id
+NOTION_TOKEN=secret_xxxx
+PAGE_ID=your_template_id
 ```
 
 > 🔐 Do not commit your `.env` file. Use GitHub Secrets or platform-specific env variables in production.
@@ -80,7 +80,7 @@ NOTION_PAGE_ID=your_template_id
 
 This project includes a manual GitHub Actions workflow for running the inspector in the cloud.
 
-1. In your repository, go to **Settings → Secrets and variables → Actions** and add a secret named `NOTION_API_KEY` containing your Notion integration token.
+1. In your repository, go to **Settings → Secrets and variables → Actions** and add a secret named `NOTION_TOKEN` containing your Notion integration token.
 2. Open the **Actions** tab and select **Inspect Notion Template**.
 3. Click **Run workflow**, enter the Notion page ID in the input box, and press the green **Run workflow** button.
 4. After the job completes, download the `notion-output` artifact from the run's summary page.
