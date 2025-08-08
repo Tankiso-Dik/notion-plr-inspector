@@ -1,26 +1,25 @@
 {
-  "name": "notion-plr-inspector",
-  "version": "1.0.0",
-  "description": "A toolkit for inspecting, summarizing, and transforming Notion templates.",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "scan": "node index.js",
-    "test": "node --test"
-  },
-  "keywords": [
-    "notion",
-    "plr",
-    "template"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
-  "dependencies": {
-    "@notionhq/client": "^4.0.1",
-    "dotenv": "^17.2.1",
-    "yargs": "^18.0.0"
-  },
-  "devDependencies": {
-    "prettier": "^3.3.2"
-  }
+"name": "notion-plr-inspector",
+"version": "1.0.0",
+"description": "A toolkit for inspecting, summarizing, and transforming Notion templates.",
+"main": "index.js",
+"type": "module",
+"scripts": {
+"scan": "node index.js"
+},
+"keywords": [
+"notion",
+"plr",
+"template"
+],
+"author": "Papermoon (Sybil)",
+"license": "MIT",
+"dependencies": {
+"@notionhq/client": "^4.0.1",
+"dotenv": "^17.2.1",
+"yargs": "^18.0.0"
+},
+"devDependencies": {
+"prettier": "^3.3.2"
+}
 }

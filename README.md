@@ -1,23 +1,23 @@
 # 🕵️ Notion PLR Inspector
 
-The **Notion PLR Inspector** is a diagnostic scanner that recursively crawls a Notion template page and extracts all the layout, visual, and metadata elements relevant for **rebranding and polishing PLR/MRR Notion products**.
+The **Notion PLR Inspector** is a minimalist diagnostic scanner for Notion templates. It recursively crawls a Notion page and extracts structured data for **rebranding and polishing PLR/MRR Notion products**.
 
-This tool collects *raw structured data* only — all analysis, copywriting, and visual planning is done downstream by AI systems like `Makeover GPT`, `Product Preparer GPT`, or `OBS GPT`.
+This tool is designed for downstream AI systems like `Makeover GPT`, `Product Preparer GPT`, or `OBS GPT`. It produces **raw structured JSON only**, not human-facing reports.
 
 ---
 
 ## 🔍 What It Does
 
-- Connects to a Notion page using the Notion API
-- Recursively walks through the page block-by-block
-- Extracts:
-  - Block type and nesting
-  - Callouts and headings
-  - Media blocks (images, videos, files)
-  - Database schemas and view types
-  - Column layouts, toggles, and groupings
-- Outputs rich, structured JSON (and optionally Markdown)
-- Designed for machine parsing — **not human readability**
+* Connects to a Notion page using the Notion API
+* Recursively walks through all blocks, including nested `child_page` blocks
+* Extracts:
+
+  * Page metadata (icon, cover, title, last edited)
+  * Block type and nesting (column lists, toggles, callouts, etc.)
+  * Media blocks (images, files)
+  * Database schemas and views
+  * All formulas from all discovered databases
+* Outputs to a single location: `outputs/`
 
 ---
 
@@ -26,14 +26,10 @@ This tool collects *raw structured data* only — all analysis, copywriting, and
 ```bash
 notion-plr-inspector/
 ├── index.js              # Entry point – runs full scan
-├── notion-client.js      # Notion API wrapper
-├── extractor.js          # Converts raw blocks to structured layout info
-├── writer.js             # Handles file output
-├── utils.js              # Optional helper functions
-├── outputs/              # Where extracted files are saved
+├── outputs/              # Final extracted files
 │   ├── notion_plr_extracted.json
-│   ├── notion_plr_extracted.md         (optional)
-│   └── db_<name>.json                  (optional)
+│   ├── formulas.json
+│   └── formulas_audit.md
 ├── .env                  # (Local only) Notion API key and default page ID
 └── README.md
 ```
@@ -47,73 +43,67 @@ notion-plr-inspector/
 * Full structured representation of the Notion template
 * Includes:
 
-  * Layout grouping (columns, nesting)
+  * Layout nesting
   * Block text and type
-  * Media file URLs
   * Page icon & cover
-  * Database schema + views
-  * Metadata for downstream GPT parsing
+  * Database schemas
 
-### ✅ `db_<name>.json` *(optional)*
+### ✅ `formulas.json`
 
-* One file per embedded or linked database
-* Field types, view types, linked relationships
+* A machine-parseable JSON of all formulas across all detected databases
+* Useful for validating logic, branding formulas, and cloning to other templates
 
-### ✅ `notion_plr_extracted.md` *(optional)*
+### ✅ `formulas_audit.md`
 
-* A flattened Markdown summary for debugging
+* A Markdown-formatted audit log showing all formulas in human-readable form
+* Used by Makeover GPT for step-by-step validation and QA
 
 ---
 
-## ⚙️ Configuration
+## ⚙️ Running the Scanner
 
-### Local `.env` setup
+### Local Setup
+
+1. Clone the repo
+2. Add your Notion integration token and default page ID to `.env`:
 
 ```env
 NOTION_TOKEN=secret_xxxx
 PAGE_ID=your_template_id
 ```
 
-> 🔐 Do not commit your `.env` file. Use GitHub Secrets or platform-specific env variables in production.
+> 🔐 Do not commit `.env` to version control
 
-### GitHub Actions
+3. Run the scan:
 
-This project includes a manual GitHub Actions workflow for running the inspector in the cloud.
+```bash
+npm run scan -- --pageId=<your_page_id> --templateName=<optional>
+```
 
-1. In your repository, go to **Settings → Secrets and variables → Actions** and add a secret named `NOTION_TOKEN` containing your Notion integration token.
-2. Open the **Actions** tab and select **Inspect Notion Template**.
-3. Click **Run workflow**, enter the Notion page ID in the input box, and press the green **Run workflow** button.
-4. After the job completes, download the `notion-output` artifact from the run's summary page.
+### GitHub Actions (Manual)
 
-> The workflow does not run automatically; trigger it manually whenever you need a new scan.
+1. Add `NOTION_TOKEN` as a secret in your GitHub repo
+2. Trigger the "Inspect Notion Template" workflow manually
+3. Download the output artifact when the job completes
 
 ---
 
 ## 💡 Design Philosophy
 
-* **Machine-first**: JSON output is meant for GPT agents, not humans
-* **Insight-rich**: Layout, media, and structure must be captured in full
-* **No filtering**: Inspector does not decide what's important — downstream GPTs do
-* **Layout-preserving**: Closely related blocks (e.g. heading + callout) are grouped
-* **Nesting-aware**: Columns, toggles, and children are retained in logical hierarchy
-
----
-
-## 🛠 Future Improvements
-
-* Add CLI flags for `--markdown-only` or `--json-only`
-* Batch scanning support
-* Export schema summaries to CSV or YAML
+* **Minimalist**: Only one main file, no plugin system, no bloat
+* **Machine-first**: Output is for GPTs, not humans
+* **Recursively Deep**: All child pages and nested databases are inspected
+* **Formula-Aware**: Full formula audit and extraction
+* **Predictable Output**: Always generates the same files in the same place
 
 ---
 
 ## 📤 License
 
-MIT (or custom internal use only — TBD)
+MIT (or internal use only — TBD)
 
 ---
 
 ## 🙌 Built by Papermoon
 
-This tool powers the scalable rebranding pipeline for Notion PLR templates. It’s part of a larger system that includes content generation, visual planning, and listing automation.
-
+This tool is the backbone of a scalable Notion template rebranding system built by Sybil @ Papermoon.
