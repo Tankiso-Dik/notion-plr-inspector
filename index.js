@@ -1,6 +1,6 @@
 // index.js (final version — outputs only, with deep recursive scan)
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { Client } from '@notionhq/client';
@@ -10,6 +10,9 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Ensure .env values override any exported env for this run
+dotenv.config({ override: true });
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
@@ -595,33 +598,39 @@ function writeNormalizedOutputs(outPath, rootPageId, rootTitle) {
     maxBlocks: { type: 'number' },
   }).parse();
 
-  // Determine PAGE_ID source and value
+  // Determine PAGE_ID source and value (CLI > .env > environment)
   let pageId = argv.pageId;
   if (pageId) {
     console.log('Using PAGE_ID from CLI');
-  } else if (process.env.PAGE_ID) {
-    // Best-effort detection whether PAGE_ID came from .env
+  } else {
+    let dotenvPageId = '';
+    let envPageId = process.env.PAGE_ID;
     try {
       const envPath = path.join(__dirname, '.env');
       if (fs.existsSync(envPath)) {
         const envText = fs.readFileSync(envPath, 'utf8');
         const line = envText.split(/\r?\n/).find(l => l.trim().startsWith('PAGE_ID='));
-        const fileVal = line ? line.split('=')[1]?.trim() : '';
-        if (fileVal && fileVal === process.env.PAGE_ID) {
-          console.log('Using PAGE_ID from .env');
-        } else {
-          console.log('Using PAGE_ID from environment');
-        }
-      } else {
-        console.log('Using PAGE_ID from environment');
+        dotenvPageId = line ? line.split('=')[1]?.trim() : '';
       }
     } catch {
-      console.log('Using PAGE_ID from environment');
+      // ignore
     }
-    pageId = process.env.PAGE_ID;
-  } else {
-    console.error('No PAGE_ID set');
-    return;
+    if (dotenvPageId) {
+      pageId = dotenvPageId;
+      if (envPageId && envPageId !== dotenvPageId) {
+        console.log('Using PAGE_ID from .env (overriding environment)');
+      } else {
+        console.log('Using PAGE_ID from .env');
+      }
+      // ensure downstream code sees consistent value
+      process.env.PAGE_ID = pageId;
+    } else if (envPageId) {
+      pageId = envPageId;
+      console.log('Using PAGE_ID from environment');
+    } else {
+      console.error('No PAGE_ID set');
+      return;
+    }
   }
 
   // Validate PAGE_ID format before any calls/IO
@@ -645,6 +654,19 @@ function writeNormalizedOutputs(outPath, rootPageId, rootTitle) {
   };
   console.log(`PAGE_ID in use: ${maskPageId(pageId)}`);
 
+  // Read previous scan ID (if any) for clearer messaging about stale outputs
+  const outPath = path.join(__dirname, 'outputs');
+  let previousScanId = null;
+  try {
+    const lastIdPath = path.join(outPath, '.last_id');
+    if (fs.existsSync(lastIdPath)) {
+      previousScanId = fs.readFileSync(lastIdPath, 'utf8').trim();
+      if (previousScanId && previousScanId !== pageId) {
+        console.log('Detected PAGE_ID change since last successful scan. Outputs will refresh after connection succeeds.');
+      }
+    }
+  } catch {}
+
   // Detect root type BEFORE touching outputs directory
   const detected = await detectRootType(pageId);
   if (detected.type === 'unknown') {
@@ -660,7 +682,6 @@ function writeNormalizedOutputs(outPath, rootPageId, rootTitle) {
   }
 
   // Now it is safe to clear outputs directory
-  const outPath = path.join(__dirname, 'outputs');
   fs.rmSync(outPath, { recursive: true, force: true });
   fs.mkdirSync(outPath, { recursive: true });
 
@@ -734,6 +755,8 @@ function writeNormalizedOutputs(outPath, rootPageId, rootTitle) {
   );
   generateFormulaFiles(outPath);
   writeNormalizedOutputs(outPath, pageId, rootTitle);
+  // Record the ID used for this successful scan
+  try { fs.writeFileSync(path.join(outPath, '.last_id'), pageId); } catch {}
   // Optional comments collection for root page (minimal fields)
   if (scanConfig.includeComments) {
     try {
@@ -754,7 +777,6 @@ function writeNormalizedOutputs(outPath, rootPageId, rootTitle) {
   const incRows = scanConfig.includeRowValues;
   const incComments = scanConfig.includeComments;
   const totalBlocks = scanConfig.blocksFetchedCount;
-  console.log(
-    `✅ Done. Files saved to /outputs — pages: ${pageCount}, databases: ${dbCount}, images: ${imageCount}. Pagination: enabled; schemaVersion added to formulas.json and notion_plr_extracted.json; concurrency=${conc}; includeRowValues=${incRows}; includeComments=${incComments}; totalBlocks=${totalBlocks}`
-  );
+  const rootHandlerType = detected.type;
+  console.log(`✅ Done. Files saved to /outputs — pages: ${pageCount}, databases: ${dbCount}, images: ${imageCount}. Pagination: enabled; schemaVersion added to formulas.json and notion_plr_extracted.json; concurrency=${conc}; includeRowValues=${incRows}; includeComments=${incComments}; totalBlocks=${totalBlocks}; Root handler: ${rootHandlerType}; what-id: added`);
 })();
