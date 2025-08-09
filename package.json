@@ -6,7 +6,15 @@
 "type": "module",
 "scripts": {
     "scan": "node index.js",
-    "what-id": "node scripts/what-id.mjs"
+    "what-id": "node scripts/what-id.mjs",
+    "scan:dump": "npm run scan && echo && for f in outputs/*; do echo \"\\n=== $(basename \\\"$f\\\") ===\"; cat \"$f\"; done",
+    "extracted": "node -e \"console.log(JSON.stringify(JSON.parse(require('fs').readFileSync('outputs/notion_plr_extracted.json','utf8')), null, 2))\"",
+    "summary": "node -e \"const fs=require('fs');function j(p){try{return JSON.parse(fs.readFileSync(p,'utf8'))}catch{return {}}};const p=j('outputs/pages.json'),d=j('outputs/databases.json'),m=j('outputs/media.json'),g=j('outputs/graph.json');console.log({pages:(p.pages||[]).length,dbs:(d.databases||[]).length,images:(m.images||[]).length,nodes:(g.nodes||[]).length,edges:(g.edges||[]).length});\"",
+    "clear": "rm -f outputs/* || true",
+    "history:snap": "node scripts/history.mjs snap",
+    "history:diff": "node scripts/history.mjs diff",
+    "history:list": "node scripts/history.mjs list",
+    "history": "node scripts/history.mjs snap && node scripts/history.mjs diff && node scripts/history.mjs list"
 },
 "keywords": [
 "notion",

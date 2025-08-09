@@ -1,135 +1,217 @@
+You’re right—my bad on the extra commands. Thanks for the `package.json`. Here’s a **drop‑in README** that matches your actual scripts exactly and adds a clear workflow + examples. You can paste this over `README.md`.
+
+---
+
 # 🕵️ Notion PLR Inspector
 
-The **Notion PLR Inspector** is a minimalist diagnostic scanner for Notion templates. It recursively crawls a Notion page and extracts structured data for **rebranding and polishing PLR/MRR Notion products**.
+Minimal, machine‑first scanner for Notion templates. It crawls a Notion **page or database**, extracts structure + metadata, and writes **structured JSON** for downstream AI (e.g., *Makeover GPT*).
 
-This tool is designed for downstream AI systems like `Makeover GPT`, `Product Preparer GPT`, or `OBS GPT`. It produces **raw structured JSON only**, not human-facing reports.
-
----
-
-## 🔍 What It Does
-
-* Connects to a Notion page using the Notion API
-* Recursively walks through all blocks, including nested `child_page` blocks
-* Extracts:
-
-  * Page metadata (icon, cover, title, last edited)
-  * Block type and nesting (column lists, toggles, callouts, etc.)
-  * Media blocks (images, files)
-  * Database schemas and views
-  * All formulas from all discovered databases
-* Outputs to a single location: `outputs/`
+* Recurses child pages/blocks
+* Extracts database schemas, formulas, media
+* Emits normalized JSON views + a simple graph
+* Supports per‑template **history snapshots & diffs**
 
 ---
 
-## 📂 Project Structure
+## What it outputs (in `outputs/`)
+
+* `notion_plr_extracted.json` – legacy full tree (blocks + titles + media)
+* `pages.json` – normalized pages view (`schemaVersion`, metadata, block counts)
+* `databases.json` – normalized DB schemas (options, relations, rollups)
+* `media.json` – flat image list
+* `graph.json` – nodes/edges (pages, dbs, relations)
+* `formulas.json` – `{ schemaVersion, formulas: { … } }`
+* `formulas_audit.md` – human‑readable formulas
+* `scan_meta.json` – run metadata + `snapshotKey` for history
+
+> History snapshots live in top‑level `history/` (recommended to add to `.gitignore`).
+
+---
+
+## Setup
+
+1. Install
 
 ```bash
-notion-plr-inspector/
-├── index.js              # Entry point – runs full scan
-├── outputs/              # Final extracted files
-│   ├── notion_plr_extracted.json
-│   ├── formulas.json
-│   ├── formulas_audit.md
-│   ├── pages.json        # schemaVersion + normalized pages view
-│   ├── databases.json    # schemaVersion + normalized DB schemas
-│   ├── media.json        # schemaVersion + flat image list
-│   └── graph.json        # schemaVersion + nodes/edges graph
-├── scripts/
-│   └── what-id.mjs       # Helper to detect if an ID is a page or database
-├── .env                  # (Local only) Notion API key and default page ID
-└── README.md
+npm install
 ```
 
----
-
-## 📄 Outputs
-
-### ✅ `notion_plr_extracted.json`
-
-* Full structured representation of the Notion template
-* Includes:
-
-  * Layout nesting
-  * Block text and type
-  * Page icon & cover
-  * Database schemas
-
-### ✅ `formulas.json`
-
-* A machine-parseable JSON of all formulas across all detected databases
-* Useful for validating logic, branding formulas, and cloning to other templates
-
-### ✅ `formulas_audit.md`
-
-* A Markdown-formatted audit log showing all formulas in human-readable form
-* Used by Makeover GPT for step-by-step validation and QA
-
----
-
-## ⚙️ Running the Scanner
-
-### Local Setup
-
-1. Clone the repo
-2. Add your Notion integration token and default page ID to `.env`:
+2. `.env`
 
 ```env
-NOTION_TOKEN=secret_xxxx
-PAGE_ID=your_template_id
+NOTION_TOKEN=secret_xxxxx
+PAGE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx   # 32‑hex or dashed UUID
 ```
 
-> 🔐 Do not commit `.env` to version control
+3. Share access in Notion
+   Invite your integration to the **root page** and any **child databases**.
 
-3. Run the scan:
+---
+
+## Run & flags
+
+Base run:
 
 ```bash
-# Basic (uses PAGE_ID from CLI or .env)
-npm run scan -- --pageId=<page_or_database_id>
-
-# Control concurrency and pagination
-npm run scan -- --pageId=<id> --concurrency=3 --maxBlocks=0
-
-# Include database row values (up to 3 rows per DB) and relation titles
-npm run scan -- --pageId=<id> --includeRowValues
-
-# Include top-level comments on the root page (writes outputs/comments.json)
-npm run scan -- --pageId=<id> --includeComments
-
-# You can also set env vars instead of flags:
-# CONCURRENCY=5 INCLUDE_ROW_VALUES=true INCLUDE_COMMENTS=true MAX_BLOCKS=100 npm run scan -- --pageId=<id>
+npm run scan
 ```
 
-### Identify what an ID refers to
+Optional flags (append after `--`):
+
+* `--pageId=<id>` (page **or** database id; DB roots are handled)
+* `--concurrency=<int>` (default 3)
+* `--includeRowValues` (paginate relation/rollup values, resolve a few related titles)
+* `--includeComments` (writes `outputs/comments.json` if permitted)
+* `--maxBlocks=<int>` (0 = unlimited)
+
+Examples:
 
 ```bash
-# Prints whether the ID is a PAGE or DATABASE, and database parent if available
-npm run what-id -- <page_or_database_id>
+npm run scan -- --concurrency=4
+npm run scan -- --pageId="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" --includeRowValues
 ```
 
-### GitHub Actions (Manual)
+---
 
-1. Add `NOTION_TOKEN` as a secret in your GitHub repo
-2. Trigger the "Inspect Notion Template" workflow manually
-3. Download the output artifact when the job completes
+## Workflow (fast loop)
+
+1. **Scan**
+
+```bash
+npm run scan
+```
+
+2. **Dump everything** (hand off to Makeover GPT)
+
+```bash
+npm run scan:dump
+```
+
+3. **Snapshot state** (per template)
+
+```bash
+npm run history:snap
+```
+
+4. **Change in Notion → rescan → diff**
+
+```bash
+npm run scan
+npm run history
+```
+
+5. **Quick counts**
+
+```bash
+npm run summary
+```
+
+6. **Clear outputs**
+
+```bash
+npm run clear
+```
 
 ---
 
-## 💡 Design Philosophy
+## Command reference (matches your package.json)
 
-* **Minimalist**: Only one main file, no plugin system, no bloat
-* **Machine-first**: Output is for GPTs, not humans
-* **Recursively Deep**: All child pages and nested databases are inspected
-* **Formula-Aware**: Full formula audit and extraction
-* **Predictable Output**: Always generates the same files in the same place
+* **`npm run scan`** – Run inspector, write JSONs to `outputs/`.
+* **`npm run scan:dump`** – Run scan, then print every file in `outputs/`.
+* **`npm run extracted`** – Pretty‑print `notion_plr_extracted.json`.
+* **`npm run summary`** – Print `{ pages, dbs, images, nodes, edges }`.
+* **`npm run clear`** – Delete files in `outputs/` (history is untouched).
+* **`npm run what-id -- <id>`** – Tell if `<id>` is PAGE or DATABASE; if DB has a page parent, print it.
+* **`npm run history:snap`** – Snapshot current `outputs/*.json` to `history/<snapshotKey>/<timestamp>/`.
+* **`npm run history:diff`** – Unified diff of the **last two** snapshots for this template.
+* **`npm run history:list`** – List snapshots for this template.
+* **`npm run history`** – Convenience: `snap → diff → list`.
 
 ---
 
-## 📤 License
+## Example outputs
 
-MIT (or internal use only — TBD)
+**`npm run summary`**
+
+```bash
+{ pages: 1, dbs: 4, images: 0, nodes: 5, edges: 4 }
+```
+
+**`npm run history`**
+
+```
+Snapshot: food-preparation/20250809_202714
+# pages.json
+--- a/pages.json
++++ b/pages.json
+@@ ...
+No other changes
+food-preparation
+20250809_202703
+20250809_202714
+```
+
+**`scan_meta.json` (shape)**
+
+```json
+{
+  "schemaVersion": "1.0.0",
+  "snapshotKey": "food-preparation",
+  "rootType": "page",
+  "pageId": "24a803b590cc8087af19f99d2dc84e73",
+  "databaseId": null,
+  "title": "Food Preparation",
+  "finishedAt": "2025-08-09T17:27:14.106Z"
+}
+```
 
 ---
 
-## 🙌 Built by Papermoon
+## How scanning behaves
 
-This tool is the backbone of a scalable Notion template rebranding system built by Sybil @ Papermoon.
+* **Root detection**
+  Page ID → traverse the page.
+  Database ID → record schema; if it has a **page parent**, continue traversal from that page; if not, write DB outputs only.
+
+* **Traversal**
+  Full pagination of child blocks; safe concurrency; supports synced blocks & tables.
+
+* **Databases**
+  Schema includes select/multi‑select/status options, relation targets, rollup config.
+  `--includeRowValues` paginates large property values and resolves a few related titles.
+
+* **Graph**
+  Nodes (pages, databases) + edges (parent/child, page→DB, DB↔DB relations).
+
+---
+
+## Troubleshooting
+
+* **401/403:** token invalid or integration not invited → share the page/DB with your integration.
+* **404 / object\_not\_found:** wrong workspace or not shared.
+* **Invalid UUID:** pass 32‑hex or dashed UUID (don’t include angle brackets).
+* **DB root error:** supported—use `--pageId=<databaseId>`; scanner will log “Root type: database …”.
+
+---
+
+## Notes
+
+* All JSONs include `"schemaVersion": "1.0.0"`.
+* Recommend `.gitignore` includes:
+
+  ```
+  .env
+  outputs/
+  history/
+  ```
+* Outputs are **for machines**—Makeover GPT can read them directly.
+
+---
+
+## License
+
+MIT (or internal—your choice).
+
+---
+
+If you want, I can also give you a tiny shell one‑liner to overwrite `README.md` with this content.

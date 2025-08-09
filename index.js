@@ -192,6 +192,19 @@ function normalizeRichText(arr) {
   }));
 }
 
+// Helper: build a sanitized snapshot key from title or fallback ID
+function makeSnapshotKey(title, fallbackId) {
+  const base = (title || '').toString().trim().toLowerCase();
+  let key = base
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  if (!key) {
+    key = (fallbackId || '').toString().trim().toLowerCase();
+  }
+  return key || 'snapshot';
+}
+
 async function inspectDatabase(dbId, location = 'Root') {
   try {
     if (processedDatabaseIds.has(dbId)) return;
@@ -770,6 +783,24 @@ function writeNormalizedOutputs(outPath, rootPageId, rootTitle) {
       // Swallow comment retrieval errors silently; non-critical
     }
   }
+  // Write scan metadata for history tooling
+  try {
+    const schemaVersion = '1.0.0';
+    const rootType = detected.type === 'database' ? 'database' : 'page';
+    const databaseId = detected.type === 'database' ? (detected.database?.id || null) : null;
+    const fallbackId = rootType === 'database' ? databaseId : pageId;
+    const snapshotKey = makeSnapshotKey(rootTitle || (detected.title || ''), fallbackId);
+    const scanMeta = {
+      schemaVersion,
+      snapshotKey,
+      rootType,
+      pageId: pageId,
+      databaseId,
+      title: rootTitle || (detected.title || null),
+      finishedAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(path.join(outPath, 'scan_meta.json'), JSON.stringify(scanMeta, null, 2));
+  } catch {}
   const pageCount = Object.keys(output.titles.pages).length;
   const dbCount = output.databases.length;
   const imageCount = output.media.imageBlocks.length;
