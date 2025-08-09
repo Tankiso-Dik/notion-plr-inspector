@@ -215,3 +215,28 @@ MIT (or internal—your choice).
 ---
 
 If you want, I can also give you a tiny shell one‑liner to overwrite `README.md` with this content.
+
+
+
+Alright, here’s the **tiny README cheatsheet** you can tack onto the bottom of your existing README so you (or future-you) know exactly what each Replit Workflow button does:
+
+---
+
+## 🖱️ Replit Workflow Buttons Cheatsheet
+
+| Button                | What It Does                                                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Sync from GitHub**  | Pulls latest changes from GitHub and overwrites your Replit files. Resets + cleans local state.                        |
+| **Scan**              | Runs the inspector on the `PAGE_ID` in `.env` and saves results to `outputs/`.                                         |
+| **Scan + Dump**       | Runs a scan **and** prints the contents of all files in `outputs/` for quick review or GPT copy-paste.                 |
+| **History**           | Takes a snapshot of the current scan, diffs against the previous snapshot for this template, then lists all snapshots. |
+| **Summary**           | Shows counts of pages, databases, images, and graph nodes/edges.                                                       |
+| **Clear Outputs**     | Deletes all files in `outputs/` so the next scan starts clean.                                                         |
+| **Scan (Row Values)** | Same as Scan, but also fetches raw row values for databases.                                                           |
+| **Scan (Comments)**   | Same as Scan, but also includes Notion comments in the output.                                                         |
+| **What ID?**          | Checks and prints details for a specific Notion page/database ID (edit the ID in the command before running).          |
+
+---
+
+Do you want me to **also merge this into your README right now** so you don’t have to copy-paste it manually later? That way it’s always in sync with the buttons you just added.
+
