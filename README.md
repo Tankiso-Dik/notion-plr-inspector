@@ -29,7 +29,13 @@ notion-plr-inspector/
 ├── outputs/              # Final extracted files
 │   ├── notion_plr_extracted.json
 │   ├── formulas.json
-│   └── formulas_audit.md
+│   ├── formulas_audit.md
+│   ├── pages.json        # schemaVersion + normalized pages view
+│   ├── databases.json    # schemaVersion + normalized DB schemas
+│   ├── media.json        # schemaVersion + flat image list
+│   └── graph.json        # schemaVersion + nodes/edges graph
+├── scripts/
+│   └── what-id.mjs       # Helper to detect if an ID is a page or database
 ├── .env                  # (Local only) Notion API key and default page ID
 └── README.md
 ```
@@ -77,7 +83,27 @@ PAGE_ID=your_template_id
 3. Run the scan:
 
 ```bash
-npm run scan -- --pageId=<your_page_id> --templateName=<optional>
+# Basic (uses PAGE_ID from CLI or .env)
+npm run scan -- --pageId=<page_or_database_id>
+
+# Control concurrency and pagination
+npm run scan -- --pageId=<id> --concurrency=3 --maxBlocks=0
+
+# Include database row values (up to 3 rows per DB) and relation titles
+npm run scan -- --pageId=<id> --includeRowValues
+
+# Include top-level comments on the root page (writes outputs/comments.json)
+npm run scan -- --pageId=<id> --includeComments
+
+# You can also set env vars instead of flags:
+# CONCURRENCY=5 INCLUDE_ROW_VALUES=true INCLUDE_COMMENTS=true MAX_BLOCKS=100 npm run scan -- --pageId=<id>
+```
+
+### Identify what an ID refers to
+
+```bash
+# Prints whether the ID is a PAGE or DATABASE, and database parent if available
+npm run what-id -- <page_or_database_id>
 ```
 
 ### GitHub Actions (Manual)

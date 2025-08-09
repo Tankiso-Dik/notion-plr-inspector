@@ -22,17 +22,6 @@ The following files must exist:
 
 ## 🧪 Output Files (inside `outputs/`)
 
----
-
-## 🔧 Expanded Outputs (Allowed)
-
-In addition to the three legacy files, the tool MAY write more machine-oriented files to `outputs/` if they improve downstream processing. Examples:
-- `pages.json`, `databases.json`, `media.json`, `graph.json`
-- Expanded `formulas.json` (same path), legacy `formulas_audit.md` stays
-
-**Legacy contract:** `notion_plr_extracted.json` MUST continue to be written for compatibility.
-
-
 Gemini should verify the presence and format of the following files after a scan run:
 
 * `notion_plr_extracted.json`

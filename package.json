@@ -5,7 +5,8 @@
 "main": "index.js",
 "type": "module",
 "scripts": {
-"scan": "node index.js"
+    "scan": "node index.js",
+    "what-id": "node scripts/what-id.mjs"
 },
 "keywords": [
 "notion",

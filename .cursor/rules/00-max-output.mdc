@@ -1,0 +1,283 @@
+# Project Vibe — Maximize Machine Outputs (MVP)
+
+## Intent
+- DO NOT constrain output count. Optimize for downstream machine use (Makeover GPT).
+- You MAY add new files in `outputs/` if they are well-structured and clearly named.
+- Preserve backward-compat: keep writing `outputs/notion_plr_extracted.json`.
+
+## Goals (ordered)
+1) Rich, normalized JSON for pages, databases, media, and a graph of relationships.
+2) Stable keys + schema version tag (e.g., `"schemaVersion": "1.0.0"`).
+3) Include IDs + names + parent paths for pages/databases.
+4) Capture UI signal from blocks: headings, callouts, toggles, columns, list types, dividers.
+5) Formulas: full expressions + where they live; also list properties that reference them (if detectable).
+6) Database schemas: property kinds, options for select/multi-select, relations (target DB + prop), rollups (rel + agg).
+7) Media: image block id, URL, caption, parent page id/path; keep a flat index.
+
+## Output Organization (examples, not mandates)
+- `outputs/notion_plr_extracted.json` (compat; summary/index)
+- `outputs/pages.json` (one array with full page meta + path + counts of block types)
+- `outputs/databases.json` (DB meta + properties, options, relations, rollups, 0–3 sample rows)
+- `outputs/media.json` (flat list of image blocks)
+- `outputs/graph.json` (nodes: pages/DBs; edges: parent→child, page→db, db→db via relations)
+- `outputs/formulas.json` (as today, OK to expand)
+- `outputs/formulas_audit.md` (unchanged; human is fine)
+
+## Notes
+- Favor denormalized indexes for downstream agents (fast lookup by id/name/type).
+- Rate limits: keep queries efficient; sampleRows still capped (~3).
+Absolutely. Here’s a tight bundle you can **copy straight into your repo**:
+
+---
+
+# 1) Additions to `.cursor/rules/00-max-output.mdc`
+
+Append this to the end:
+
+```
+## Enrichments (Append)
+- Fetch full child blocks with pagination (`start_cursor`, `has_more`) for 100% coverage.
+- Resolve database property DETAILS:
+  - Relations: include target database id + sample related page titles (if accessible).
+  - Rollups: include relation prop, target prop, function, and sample computed value.
+  - Status/Select/Multi-select: include option ids/names/colors.
+- Page property VALUES: for sample rows, handle property pagination via `pages.properties.retrieve`.
+- Rich text styling: capture annotations (bold/italic/code/color) and hrefs when helpful for theming.
+- Synced blocks: recurse into original; for duplicates, record a reference to original id (avoid duplication).
+- Tables (non-database): collect `table_width`, header flags, and row `cells[*][*].plain_text`.
+- Concurrency: small pool (3–5) for parallel child fetches with 429 backoff.
+- Optional: comments (if integration has permission) — list top-level page/block comments.
+```
+
+---
+
+# 2) README – “Advanced Mode” (paste under **Running the Scanner**)
+
+````md
+### Advanced Mode (Richer Output)
+
+These flags tune depth + fidelity (all optional):
+
+```bash
+# show plan, then scan with small concurrency
+npm run scan -- --concurrency=4
+
+# include page property VALUES for DB sample rows (relations/rollups pagination)
+npm run scan -- --includeRowValues
+
+# include comments (integration must have comment read capability)
+npm run scan -- --includeComments
+
+# limit max blocks per page (safety throttle; 0 = unlimited)
+npm run scan -- --maxBlocks=0
+````
+
+What gets richer:
+
+* **Relations**: adds related page titles (if accessible).
+* **Rollups**: adds sample computed values.
+* **Styling**: stores minimal annotations (bold/italic/code/color, href).
+* **Tables**: captures table rows/cells.
+* **Synced blocks**: de-duplicated; duplicates point to one original.
+
+````
+
+---
+
+# 3) `REFACTOR_PLAN.md` (new file)
+Create `REFACTOR_PLAN.md` with:
+
+```md
+# Refactor Plan — Notion PLR Inspector
+
+## Goals
+- Full pagination for block children and page property values.
+- Richer DB property details (relations/rollups/status).
+- Optional: comments, styling hints, table blocks, synced blocks.
+- Safe parallelism with backoff; exact outputs preserved + enriched.
+
+## Tasks
+1) **Pagination helper**
+   - `listAllBlocks(block_id, pageSize=100)`: loop with `start_cursor` until `has_more=false`.
+   - Use in place of single `blocks.children.list` call.
+
+2) **Concurrency**
+   - Small pool (3–5) for fetching children of blocks that `has_children=true`.
+   - Keep exponential backoff for 429.
+
+3) **DB property deepening**
+   - When retrieving DB **schema**, include:
+     - `select/multi_select` options (id/name/color)
+     - `status` property (value id/name/color) + mark type
+     - `relation`: `database_id`, `dual_property` (if present)
+     - `rollup`: `relation_property_name`, `rollup_property_name`, `function`
+   - When fetching sample rows:
+     - For any property with `has_more=true`, call
+       `pages.properties.retrieve({ page_id, property_id, start_cursor })` until complete.
+     - For relation values, optionally fetch related page **title** (guard with permission checks & a cap, e.g., first 5).
+
+4) **Rich text + styling (minimal)**
+   - For block rich_text arrays, output:
+     - `plain_text`, `href`, and `annotations` (bold/italic/code/color).
+   - Helpful for Makeover GPT theming without turning into markdown.
+
+5) **Synced & table blocks**
+   - `synced_block`:
+     - If `synced_from === null` -> recurse children.
+     - Else record `{ type:"synced_ref", original_block_id }` (no duplicate crawl).
+   - `table`:
+     - Record `table_width`, header flags.
+     - Children are `table_row` with `cells[col][rich_text[]]` → collect `plain_text`.
+
+6) **Optional comments**
+   - If `--includeComments`, call `notion.comments.list({ block_id: pageId })` for top-level; store `{author,time,plain_text}`.
+
+7) **Schema versioning**
+   - Keep `schemaVersion: "1.0.0"` across all JSONs; bump when shapes change.
+
+## Acceptance
+- Same files still produced in `outputs/`: legacy + normalized.
+- New fields only **add** information; no breaking renames.
+- Scan summary prints total blocks fetched (pagination verified).
+- Handles 403/404/429 gracefully without losing prior outputs.
+
+````
+
+---
+
+# 4) Code snippets (drop-in examples)
+
+### a) Block pagination helper
+
+```js
+async function listAllBlocks(block_id, page_size = 100) {
+  const out = [];
+  let cursor = undefined;
+  do {
+    const page = await withBackoff(() =>
+      notion.blocks.children.list({ block_id, page_size, start_cursor: cursor })
+    );
+    out.push(...page.results);
+    cursor = page.has_more ? page.next_cursor : undefined;
+  } while (cursor);
+  return out;
+}
+```
+
+### b) Concurrency pool (tiny)
+
+```js
+function createPool(limit = 4) {
+  const q = [];
+  let active = 0;
+  const runNext = () => {
+    if (!q.length || active >= limit) return;
+    active++;
+    const { fn, resolve, reject } = q.shift();
+    fn().then(resolve, reject).finally(() => {
+      active--;
+      runNext();
+    });
+  };
+  return (fn) =>
+    new Promise((resolve, reject) => {
+      q.push({ fn, resolve, reject });
+      runNext();
+    });
+}
+// usage: const run = createPool(4); await Promise.all(ids.map(id => run(() => fetchChildren(id))));
+```
+
+### c) Page property pagination (relations/rollups)
+
+```js
+async function getFullProperty(page_id, property_id) {
+  let cursor, items = [];
+  do {
+    const resp = await withBackoff(() =>
+      notion.pages.properties.retrieve({ page_id, property_id, start_cursor: cursor })
+    );
+    // resp can be {object:'list', results:[] } OR a terminal value (number/date/etc.)
+    if (resp.object === 'list') {
+      items.push(...resp.results);
+      cursor = resp.has_more ? resp.next_cursor : undefined;
+    } else {
+      // terminal scalar value (e.g., number/date/formula result)
+      return resp;
+    }
+  } while (cursor);
+  return { object: 'list', results: items };
+}
+```
+
+### d) Relation → fetch related page titles (capped)
+
+```js
+async function hydrateRelationTitles(relationIds, limit = 5) {
+  const slice = relationIds.slice(0, limit);
+  const titles = [];
+  for (const id of slice) {
+    try {
+      const page = await withBackoff(() => notion.pages.retrieve({ page_id: id }));
+      const tprop = Object.values(page.properties).find(p => p.type === 'title');
+      const title = tprop?.title?.map(t => t.plain_text).join('') || 'Untitled';
+      titles.push({ id, title });
+    } catch { titles.push({ id, title: null }); }
+  }
+  return titles;
+}
+```
+
+### e) Extract minimal styling from rich\_text
+
+```js
+function mapRichText(rt = []) {
+  return rt.map(t => ({
+    plain_text: t.plain_text,
+    href: t.href || null,
+    annotations: t.annotations ? {
+      bold: !!t.annotations.bold,
+      italic: !!t.annotations.italic,
+      code: !!t.annotations.code,
+      color: t.annotations.color && t.annotations.color !== 'default' ? t.annotations.color : null
+    } : null
+  }));
+}
+```
+
+### f) Synced & table blocks (inside `inspectBlock`)
+
+```js
+if (type === 'synced_block') {
+  const sb = block.synced_block;
+  if (sb.synced_from === null) {
+    // original: crawl its children
+    data.synced_kind = 'original';
+    data.children = await crawlChildren(block.id, indent + 1, location);
+  } else {
+    // duplicate: reference only
+    data.synced_kind = 'reference';
+    data.original_block_id = sb.synced_from.block_id;
+  }
+} else if (type === 'table') {
+  data.table = {
+    width: block.table.table_width,
+    has_column_header: !!block.table.has_column_header,
+    has_row_header: !!block.table.has_row_header,
+  };
+  const rows = await listAllBlocks(block.id);
+  data.rows = rows
+    .filter(r => r.type === 'table_row')
+    .map(r => r.table_row.cells.map(col => mapRichText(col).map(x => x.plain_text).join('')));
+}
+```
+
+---
+
+If you’re good with this, I can package these as:
+
+* a patch to `.cursor/rules/00-max-output.mdc`,
+* an updated README chunk,
+* and create `REFACTOR_PLAN.md`.
+
+Say the word and I’ll give you a single bash block to write all three files in one go.
